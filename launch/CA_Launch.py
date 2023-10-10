@@ -21,7 +21,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='crazyflie',
-            executable='crazyflie_server',
+            executable='crazyflie_server.py',
             name='crazyflie_server',
             output='screen',
             parameters=[server_params],
