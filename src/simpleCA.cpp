@@ -6,7 +6,7 @@
 #include "std_msgs/msg/string.hpp"
 #include "crazyflie_interfaces/msg/log_data_generic.hpp"
 #include "crazyflie_interfaces/msg/hover.hpp"
-
+//TODO: add takeoff service call
 
 using std::placeholders::_1;
 
@@ -17,7 +17,7 @@ class SimpleCA : public rclcpp::Node
     : Node("simple_ca"), count_(0)
     {
 
-      this->declare_parameter("threshold", 100);
+      this->declare_parameter("threshold", 100.0);
       this->declare_parameter("height", 0.5);
       this->declare_parameter("speed", 0.2);
       this->declare_parameter("drone", "cf13");
