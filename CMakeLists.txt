@@ -29,8 +29,23 @@ ament_target_dependencies(simpleCA
   geometry_msgs
 )
 
+add_executable(interdroneCA_test 
+  src/interDroneCATest.cpp
+)
+ament_target_dependencies(interdroneCA_test 
+  rclcpp
+  sensor_msgs
+  std_srvs
+  crazyflie_interfaces
+  geometry_msgs
+)
+
 install(TARGETS
   simpleCA
+  DESTINATION lib/${PROJECT_NAME})
+
+install(TARGETS
+  interdroneCA_test
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

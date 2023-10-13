@@ -9,11 +9,6 @@
 
 
 using std::placeholders::_1;
-/* This example creates a subclass of Node and uses std::bind() to register a
-* member function as a callback from the timer. */
-
-const float THRESHOLD = 100;
-const float HEIGHT = 0.5;
 
 class SimpleCA : public rclcpp::Node
 {
@@ -21,15 +16,27 @@ class SimpleCA : public rclcpp::Node
     SimpleCA()
     : Node("simple_ca"), count_(0)
     {
+
+      this->declare_parameter("threshold", 100);
+      this->declare_parameter("height", 0.5);
+      this->declare_parameter("speed", 0.2);
+      this->declare_parameter("drone", "cf13");
+
+      this->get_parameter("threshold",threshold_);
+      this->get_parameter("height",height_);
+      this->get_parameter("speed",speed_);
+      this->get_parameter("drone",drone_);
+
+      
       //declare drone name parameter
       //publish to movement topic
       //publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
       //subscribe to range topic
       
       subscription_ = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>(
-            "/cf13/topic_name1", 10, std::bind(&SimpleCA::range_callback, this, _1));
+            "/" + drone_ + "/topic_name1", 10, std::bind(&SimpleCA::range_callback, this, _1));
       publisher_ = this->create_publisher<crazyflie_interfaces::msg::Hover>(
-            "/cf13/cmd_hover", 10);
+            "/" + drone_ + "/cmd_hover", 10);
       RCLCPP_INFO_STREAM(this->get_logger(), "initialised!");   
     }
 
@@ -39,14 +46,21 @@ class SimpleCA : public rclcpp::Node
     {
       //RCLCPP_INFO(this->get_logger(), "Front: '%f' Back: '%f' Left: '%f' Right: '%f'", (msg.values[0]),(msg.values[1]),(msg.values[2]),(msg.values[3]));
       auto message = crazyflie_interfaces::msg::Hover();
-      if (msg.values[0]<THRESHOLD){
+      if (msg.values[0]<threshold_){
         //publish move back message
         RCLCPP_INFO_STREAM(this->get_logger(), "moving back!");   
         message.header.stamp = rclcpp::Clock().now();
-        message.vx = -0.5;
+        message.vx = -speed_;
         message.vy = 0.0;
         message.yaw_rate = 0.0;
-        message.z_distance = HEIGHT;
+        message.z_distance = height_;
+      } else if (msg.values[0]>threshold_+50){
+        RCLCPP_INFO_STREAM(this->get_logger(), "moving forward!");   
+        message.header.stamp = rclcpp::Clock().now();
+        message.vx = speed_;
+        message.vy = 0.0;
+        message.yaw_rate = 0.0;
+        message.z_distance = height_;
       } else {
         //publish stop message
         RCLCPP_INFO_STREAM(this->get_logger(), "stopped");   
@@ -54,7 +68,7 @@ class SimpleCA : public rclcpp::Node
         message.vx = 0.0;
         message.vy = 0.0;
         message.yaw_rate = 0.0;
-        message.z_distance = HEIGHT;
+        message.z_distance = height_;
         
       }
       publisher_->publish(message);
@@ -62,6 +76,10 @@ class SimpleCA : public rclcpp::Node
     rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr subscription_;
     rclcpp::Publisher<crazyflie_interfaces::msg::Hover>::SharedPtr publisher_;
     //rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+    float threshold_;
+    float height_;
+    float speed_;
+    std::string drone_;
     size_t count_;
 };
 
