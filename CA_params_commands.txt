@@ -1,0 +1,7 @@
+ros2 launch safmc2024 CA_launch
+ros2 run safmc2024 simpleCA --ros-args -p speed:=0.0 -p height:=0.0 -p threshold:=100.0
+ros2 run safmc2024 simpleCA --ros-args -p speed:=0.0 -p height:=0.0 -p threshold:=100.0 -p drone:=cf14 --remap __node:=simple_ca2
+
+
+
+//possible to remap node names and remap topics for node reuse
