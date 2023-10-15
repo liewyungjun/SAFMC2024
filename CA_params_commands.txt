@@ -1,6 +1,7 @@
 ros2 launch safmc2024 CA_launch
-ros2 run safmc2024 simpleCA --ros-args -p speed:=0.0 -p height:=0.0 -p threshold:=100.0
-ros2 run safmc2024 simpleCA --ros-args -p speed:=0.0 -p height:=0.0 -p threshold:=100.0 -p drone:=cf14 --remap __node:=simple_ca2
+ros2 service call all/takeoff crazyflie_interfaces/srv/Takeoff "{height: 0.5, duration: {sec: 2}}"
+ros2 run safmc2024 simpleCA --ros-args -p speed:=0.5 -p threshold:=100.0
+ros2 run safmc2024 simpleCA --ros-args -p speed:=0.5 -p threshold:=100.0 -p drone:=cf14 --remap __node:=simple_ca2
 
 
 

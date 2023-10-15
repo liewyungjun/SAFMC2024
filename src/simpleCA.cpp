@@ -8,7 +8,7 @@
 #include "crazyflie_interfaces/msg/hover.hpp"
 //TODO: add takeoff service call
 
-using std::placeholders::_1;
+using std::placeholders::_1;  
 
 class SimpleCA : public rclcpp::Node
 {
@@ -26,13 +26,7 @@ class SimpleCA : public rclcpp::Node
       this->get_parameter("height",height_);
       this->get_parameter("speed",speed_);
       this->get_parameter("drone",drone_);
-
-      
-      //declare drone name parameter
-      //publish to movement topic
-      //publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
-      //subscribe to range topic
-      
+  
       subscription_ = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>(
             "/" + drone_ + "/topic_name1", 10, std::bind(&SimpleCA::range_callback, this, _1));
       publisher_ = this->create_publisher<crazyflie_interfaces::msg::Hover>(
