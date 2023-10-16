@@ -1,4 +1,5 @@
-#include <chrono>#include <functional>
+#include <chrono>
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -6,6 +7,7 @@
 #include "std_msgs/msg/string.hpp"
 #include "crazyflie_interfaces/msg/log_data_generic.hpp"
 #include "crazyflie_interfaces/msg/hover.hpp"
+#include "crazyflie_interfaces/srv/takeoff.hpp"
 //TODO: add takeoff service call
 
 using std::placeholders::_1;  
@@ -58,7 +60,7 @@ class SimpleCA : public rclcpp::Node
       request->duration = 2.0;
       auto result = takeoff_client_->async_send_request(request);
       if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-          rclcpp::executor::FutureReturnCode::SUCCESS)
+          rclcpp::FutureReturnCode::SUCCESS)
       {
         RCLCPP_INFO(this->get_logger(), "Takeoff service succeeded");
       } else {
@@ -107,7 +109,7 @@ class SimpleCA : public rclcpp::Node
     }
     void range_callback(const crazyflie_interfaces::msg::LogDataGeneric & msg)
     {
-      range_vector_.push_back(msg->values[0]);
+      range_vector_.push_back(msg.values[0]);
       //RCLCPP_INFO(this->get_logger(), "Front: '%f' Back: '%f' Left: '%f' Right: '%f'", (msg.values[0]),(msg.values[1]),(msg.values[2]),(msg.values[3]));
     }
     rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr subscription_;
