@@ -7,13 +7,14 @@ from cflib.positioning.motion_commander import MotionCommander
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.crazyflie.log import LogConfig
 from cflib.utils.multiranger import Multiranger
+import time
 
 # Define the URI of the Crazyflie to connect to
 URI = 'radio://0/120/2M/E7E7E7E715'
 URI2 = 'radio://0/120/2M/E7E7E7E713'
 
 # Define the velocity of the drone
-VELOCITY = 0.5
+VELOCITY = 0.1
 YAW_RATE = 30 # deg/s
 
 # Define the keyboard input settings
@@ -47,6 +48,7 @@ if __name__ == '__main__':
     cf = Crazyflie(rw_cache='./cache')
     cf2 = Crazyflie(rw_cache='./cache2')
     with SyncCrazyflie(URI, cf=cf) as scf,  SyncCrazyflie(URI2, cf=cf2) as scf2:
+    #with SyncCrazyflie(URI, cf=cf) as scf:
         # Create a MotionCommander object for controlling the drone
         with MotionCommander(scf) as motion_commander:
         # Create a MotionCommander object for controlling the drone
@@ -65,29 +67,10 @@ if __name__ == '__main__':
                             # Get the keyboard input
                             motion_commander2.stop()
                             ch = get_input()
-                            print("key pressed is " + ch)
-
-                            # Move the drone based on the keyboard input
-                            if ch == 'w':
-                                motion_commander.forward(VELOCITY)
-                            elif ch == 's':
-                                motion_commander.back(VELOCITY)
-                            elif ch == 'a':
-                                motion_commander.left(VELOCITY)
-                            elif ch == 'd':
-                                motion_commander.right(VELOCITY)
-                            elif ch == 't':
-                                motion_commander.up(VELOCITY)
-                            elif ch == 'g':
-                                motion_commander.down(VELOCITY)
-                            elif ch == 'z':
-                                motion_commander.start_linear_motion(0.0, 0.0, 0.0, YAW_RATE)
-                            elif ch == 'c':
-                                motion_commander.start_linear_motion(0.0, 0.0, 0.0, -YAW_RATE)
-                            elif ch == 'x':
-                                motion_commander.start_linear_motion(0.0, 0.0, 0.0, 0.0)
-                            elif ch == 'q':
+                            motion_commander.forward(0.05,VELOCITY)
+                            if ch == 'q':
                                 break
+                            time.sleep(0.2)
 
                             # Print the multiranger values
                             print_multiranger(multiranger)
