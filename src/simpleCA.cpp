@@ -2,13 +2,17 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include "builtin_interfaces/msg/duration.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "crazyflie_interfaces/msg/log_data_generic.hpp"
 #include "crazyflie_interfaces/msg/hover.hpp"
 #include "crazyflie_interfaces/srv/takeoff.hpp"
+#include "crazyflie_interfaces/srv/land.hpp"
 //TODO: add takeoff service call
+
+
 
 using std::placeholders::_1;  
 
@@ -20,10 +24,10 @@ class SimpleCA : public rclcpp::Node
     {
 
       this->declare_parameter("threshold", 100.0);
-      this->declare_parameter("height", 0.5);
+      this->declare_parameter("height", 1.0);
       this->declare_parameter("speed", 0.2);
       this->declare_parameter("drone", "cf13");
-      this->declare_parameter("timer_period_ms", 100);
+      this->declare_parameter("timer_period_ms", 1000);
 
 
       this->get_parameter("threshold",threshold_);
@@ -39,14 +43,20 @@ class SimpleCA : public rclcpp::Node
             "/" + drone_ + "/cmd_hover", 10);
       // Create a timer to trigger the range callback
       timer_ = this->create_wall_timer(std::chrono::milliseconds(timer_period_ms_), std::bind(&SimpleCA::timer_callback, this));
+      timer_ ->cancel();
+      getchar();
+      timer_->reset();
+      
+      // Register the SIGINT handler
+      //std::signal(SIGINT, &SimpleCA::sigint_handler);
 
       // Initialize the range vector
       range_vector_.reserve(10);
       RCLCPP_INFO_STREAM(this->get_logger(), "initialised!"); 
 
-      takeoff_client_ = this->create_client<crazyflie_interfaces::srv::Takeoff>("takeoff");
+      takeoff_client_ = this->create_client<crazyflie_interfaces::srv::Takeoff>("/" + drone_ + "/takeoff");
       // Wait for the takeoff service to be available
-      while (!takeoff_client_->wait_for_service(1s)) {
+      while (!takeoff_client_->wait_for_service(std::chrono::seconds(1))) {
         if (!rclcpp::ok()) {
           RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
           return;
@@ -57,7 +67,9 @@ class SimpleCA : public rclcpp::Node
       // Call the takeoff service
       auto request = std::make_shared<crazyflie_interfaces::srv::Takeoff::Request>();
       request->height = height_;
-      request->duration = 2.0;
+      builtin_interfaces::msg::Duration duration;
+      duration.sec = 2;
+      request->duration = duration;
       auto result = takeoff_client_->async_send_request(request);
       if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
           rclcpp::FutureReturnCode::SUCCESS)
